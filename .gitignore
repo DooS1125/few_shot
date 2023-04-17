@@ -1,5 +1,4 @@
 
 
-#ESC_data/
+ESC_data/*.wav
 
-*.wav
