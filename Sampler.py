@@ -6,7 +6,8 @@ import pandas as pd
 
 class CategoriesSampler():
 
-    def __init__(self, label, n_batch, n_cls, n_per):
+    def __init__(self, label, n_batch, n_cls, n_per):  #label, n_batch = 100, n_cls = args.train_way(5), n_per = args.shot(5) + args.query(5)
+                                     
         self.n_batch = n_batch
         self.n_cls = n_cls
         self.n_per = n_per

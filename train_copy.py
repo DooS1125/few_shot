@@ -5,12 +5,12 @@ from pprint import pprint
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from Data import *
 from Sampler import *
 from Proto import *
 from utils import *
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -29,14 +29,14 @@ if __name__ == '__main__':
     ensure_path(args.save_path)
 
     trainset = ESC_data('train')
-    train_sampler = CategoriesSampler(trainset.label, 100,
+    train_sampler = CategoriesSampler(trainset.label, 30,
                                       args.train_way, args.shot + args.query)
 
     train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler,
                               num_workers=0, pin_memory=True)
 
     valset = ESC_data('val')
-    val_sampler = CategoriesSampler(valset.label, 400,
+    val_sampler = CategoriesSampler(valset.label, 30,
                                     args.test_way, args.shot + args.query)
     val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler,
                             num_workers=0, pin_memory=True)
@@ -59,48 +59,9 @@ if __name__ == '__main__':
     trlog['max_acc'] = 0.0
 
     timer = Timer()
-    
-    for epoch in range(1, args.max_epoch + 1):
 
-        model.train()
-        
-        tl = Averager()
-        ta = Averager()
-        
-        # for문에서 현재 문제가...ㄷㄷ
-        for i, batch in enumerate(train_loader, 1):
-            data, _ = [_.cuda() for _ in batch]
-            p = args.shot * args.train_way
-            data_shot, data_query = data[:p], data[p:]
-
-            proto = model(data_shot)
-            proto = proto.reshape(args.shot, args.train_way, -1).mean(dim=0)
-
-            label = torch.arange(args.train_way).repeat(args.query)
-            label = label.type(torch.cuda.LongTensor)
-
-            logits = euclidean_metric(model(data_query), proto)
-            loss = F.cross_entropy(logits, label)
-            acc = count_acc(logits, label)
-            print('epoch {}, train {}/{}, loss={:.4f} acc={:.4f}'
-                  .format(epoch, i, len(train_loader), loss.item(), acc))
-
-            tl.add(loss.item())
-            ta.add(acc)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            
-            proto = None; logits = None; loss = None
-            
-        lr_scheduler.step()
-
-        tl = tl.item()
-        ta = ta.item()
-
+    def validate(epoch, model, val_loader, args):
         model.eval()
-
         vl = Averager()
         va = Averager()
 
@@ -119,29 +80,58 @@ if __name__ == '__main__':
             loss = F.cross_entropy(logits, label)
             acc = count_acc(logits, label)
 
+            print('epoch {}, valid {}/{}, loss={:.4f} acc={:.4f}'
+                .format(epoch, i, len(val_loader), loss.item(), acc))
+
             vl.add(loss.item())
             va.add(acc)
-            
+
             proto = None; logits = None; loss = None
 
-        vl = vl.item()
-        va = va.item()
-        print('epoch {}, val, loss={:.4f} acc={:.4f}'.format(epoch, vl, va))
+        return vl.item(), va.item()
 
-        if va > trlog['max_acc']:
-            trlog['max_acc'] = va
-            save_model('max-acc')
+    def train(model, train_loader, val_loader, optimizer, lr_scheduler, args):
+        for epoch in range(1, args.max_epoch + 1):
+            model.train()
+            tl = Averager()
+            ta = Averager()
 
-        trlog['train_loss'].append(tl)
-        trlog['train_acc'].append(ta)
-        trlog['val_loss'].append(vl)
-        trlog['val_acc'].append(va)
+            for i, batch in enumerate(train_loader, 1):
+                data, _ = [_.cuda() for _ in batch]
+                p = args.shot * args.train_way
+                data_shot, data_query = data[:p], data[p:]
 
-        torch.save(trlog, osp.join(args.save_path, 'trlog'))
+                proto = model(data_shot)
+                proto = proto.reshape(args.shot, args.train_way, -1).mean(dim=0)
 
-        save_model('epoch-last')
+                label = torch.arange(args.train_way).repeat(args.query)
+                label = label.type(torch.cuda.LongTensor)
 
-        if epoch % args.save_epoch == 0:
-            save_model('epoch-{}'.format(epoch))
+                logits = euclidean_metric(model(data_query), proto)
+                loss = F.cross_entropy(logits, label)
+                acc = count_acc(logits, label)
+                print('epoch {}, train {}/{}, loss={:.4f} acc={:.4f}'
+                    .format(epoch, i, len(train_loader), loss.item(), acc))
 
-        print('ETA:{}/{}'.format(timer.measure(), timer.measure(epoch / args.max_epoch)))
+                tl.add(loss.item())
+                ta.add(acc)
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                proto = None; logits = None; loss = None
+
+            lr_scheduler.step()
+            train_loss, train_acc = tl.item(), ta.item()
+
+            val_loss, val_acc = validate(epoch, model, val_loader, args)
+            print('epoch {}, val, loss={:.4f} acc={:.4f}'.format(epoch, val_loss, val_acc))
+
+            if epoch == args.max_epoch:
+                print('epoch {}, train_loss={:.4f}, train_acc={:.4f}, val_loss={:.4f}, val_acc={:.4f}'.format(epoch, train_loss, train_acc, val_loss, val_acc))
+
+        return train_loss, train_acc, val_loss, val_acc
+
+
+    train_loss, train_acc, val_loss, val_acc = train(model, train_loader, val_loader, optimizer, lr_scheduler, args)

@@ -38,7 +38,6 @@ def MFCC(x, n_fft=372, win_length=372, hop_length=93, sr=4000, n_mfcc=14):
 
 
 
-
 def split_batch(audios, targets):
     support_audios, query_audios = audios.chunk(2, dim=0)
     support_targets, query_targets = targets.chunk(2, dim=0)
