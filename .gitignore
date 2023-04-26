@@ -1,0 +1,6 @@
+
+delete/
+*.pyc
+*.wav
+save/
+*.npz
