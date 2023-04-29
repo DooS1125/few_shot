@@ -6,7 +6,6 @@ import os.path as osp
 import pandas as pd
 from utils import *
 
-### train, val, test 나누는 코드 필요?
 csv_path = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/esc50.csv'
 ROOT_PATH = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/alldata'
 train_classes, val_classes, test_classes = train_test_split_class()

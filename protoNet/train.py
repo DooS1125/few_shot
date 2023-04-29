@@ -66,7 +66,6 @@ if __name__ == '__main__':
         tl = Averager()
         ta = Averager()
         
-        # for문에서 현재 문제가...ㄷㄷ
         for i, batch in enumerate(train_loader, 1):
             data, _ = [_.cuda() for _ in batch]
             p = args.shot * args.train_way
