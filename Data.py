@@ -4,7 +4,7 @@ from torchvision import transforms
 import os
 import os.path as osp
 import pandas as pd
-from utils import *
+from utils.utils import *
 
 ### train, val, test 나누는 코드 필요?
 csv_path = './ESC_data/esc50.csv'
@@ -13,8 +13,7 @@ train_classes, val_classes, test_classes = train_test_split_class()
 n_mels=40
 
 class ESC_data(data.Dataset):
-
-    def __init__(self, set_name, feature='mel', sample_rate=22050 ):
+    def __init__(self, set_name, feature='mel', sample_rate=22050):
         """
         class_to_idx = data_csv[['target', 'category']].drop_duplicates().sort_values(by='target').set_index('category').to_dict()['target']
         category_df = data_csv[['category','target']].sort_values(by='target').drop_duplicates(subset='target').reset_index(drop=True)
@@ -65,9 +64,12 @@ class ESC_data(data.Dataset):
         path, label = self.data[i], self.label[i]
         samples, _ = librosa.load(path=path, sr=self.sample_rate)
         samples = norm_max(samples)
+
         if self.feature=='mel':
             audio = log_mel(x=samples, n_mel=n_mels, sr=self.sample_rate, n_fft=372, hop_length=93)
         elif self.feature == 'mfcc':
             audio = MFCC(x=samples, n_fft=372, win_length=372, hop_length=93, sr=self.sample_rate, n_mfcc=14)
+        
         audio = torch.Tensor(audio).unsqueeze(0)
+        
         return audio, label

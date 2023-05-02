@@ -5,6 +5,8 @@ from scipy.signal import butter, lfilter
 import os
 import shutil
 import time
+import matplotlib.pyplot as plt
+import random
 
 # Transform Class
 # Preprocessing Def
@@ -36,13 +38,10 @@ def MFCC(x, n_fft=372, win_length=372, hop_length=93, sr=4000, n_mfcc=14):
     mfcc = librosa.feature.mfcc(S = librosa.power_to_db(D), sr = sr, n_mfcc = n_mfcc)
     return mfcc
 
-
-
 def split_batch(audios, targets):
     support_audios, query_audios = audios.chunk(2, dim=0)
     support_targets, query_targets = targets.chunk(2, dim=0)
     return support_audios, query_audios, support_targets, query_targets
-
 
 def set_gpu(x):
     os.environ['CUDA_VISIBLE_DEVICES'] = x
@@ -96,7 +95,6 @@ def l2_loss(pred, label):
     return ((pred - label)**2).sum() / len(pred) / 2
 
 
-
 def train_test_split_class(n=0, n_classes=50, n_train=30, n_val=10):
     torch.manual_seed(n)           # Set seed for reproducibility
     classes = torch.randperm(n_classes)  # Returns random permutation of numbers 0 to 50
@@ -105,3 +103,36 @@ def train_test_split_class(n=0, n_classes=50, n_train=30, n_val=10):
     else:
         train_classes, val_classes, test_classes = classes[:n_train], classes[n_train:n_train + n_val], classes[n_train + n_val:]
     return train_classes, val_classes, test_classes
+
+def seed_everything(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
+
+def plot_results(train_loss, val_loss, train_acc, val_acc):
+    fig, axes = plt.subplots(1, 2, figsize=(20, 7))
+
+    axes[0].grid()
+    axes[0].plot(train_loss, label='train_loss')
+    axes[0].plot(val_loss, label='val_loss')
+    axes[0].set_xlabel('epoch')
+    axes[0].set_ylabel('loss')
+    axes[0].set_title("Loss", fontsize=25)
+    axes[0].legend()
+
+    axes[1].grid()
+    axes[1].plot(train_acc, label='train_acc')
+    axes[1].plot(val_acc, label='val_acc')
+    axes[1].set_xlabel('epoch')
+    axes[1].set_ylabel('accuracy')
+    axes[1].set_title("Accuracy", fontsize=25)
+    axes[1].legend()
+
+    plt.show()
+
+
+

@@ -3,7 +3,6 @@ import numpy as np
 from Data import *
 import pandas as pd
 
-
 class CategoriesSampler():
 
     def __init__(self, label, n_batch, n_cls, n_per):  #label, n_batch = 100, n_cls = args.train_way(5), n_per = args.shot(5) + args.query(5)
