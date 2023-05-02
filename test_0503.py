@@ -11,23 +11,21 @@ from models.Proto import *
 from utils.utils import *
 
 
-def inference(model, test_loader, args):
+def inference(model, test_loader, device, args):
     model.eval()
-    test_loss = []
-    test_acc =[]
+    test_loss, test_acc = [], []
     start_time = time.time()
 
     with torch.no_grad():
         for batch in tqdm(test_loader):
-            data, _ = [_.cuda() for _ in batch]
+            data, _ = [_.to(device) for _ in batch]
             p = args.shot * args.test_way
             data_shot, data_query = data[:p], data[p:]
 
             proto = model(data_shot)
             proto = proto.reshape(args.shot, args.test_way, -1).mean(dim=0)
 
-            label = torch.arange(args.test_way).repeat(args.query)
-            label = label.type(torch.cuda.LongTensor)
+            label = torch.arange(args.test_way).repeat(args.query).type(torch.cuda.LongTensor)
 
             logits = euclidean_metric(model(data_query), proto)
             loss = F.cross_entropy(logits, label)
@@ -53,9 +51,9 @@ if __name__ == '__main__':
     parser.add_argument('--load', default='./weights/best.pt')
     args = parser.parse_args()
 
+    seed_everything(2023)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-    testset = ESC_data('test')
+    testset = ESC_data('val')
     test_sampler = CategoriesSampler(testset.label, 30,
                                 args.test_way, args.shot + args.query)
     test_loader = DataLoader(dataset=testset, batch_sampler=test_sampler,
@@ -64,5 +62,4 @@ if __name__ == '__main__':
     model = Convnet().to(device)
     model.load_state_dict(torch.load(args.load))
 
-    test_loss, test_acc = inference(model, test_loader, args)
-
+    test_loss, test_acc = inference(model, test_loader, device, args)

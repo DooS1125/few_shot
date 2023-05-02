@@ -1,14 +1,11 @@
 
-<<<<<<< HEAD
 
 ESC_data/*.wav
 
-=======
 delete/
 *.pyc
 *.wav
 save/
 *.npz
->>>>>>> origin/developer/ds
 
 
