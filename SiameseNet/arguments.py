@@ -73,7 +73,7 @@ misc_arg.add_argument('--resume', type=str2bool, default=False,
                       help='Whether to resume training from checkpoint')
 
 
-def ge_config():
+def get_config():
     config, _ = parser.parse_known_args()
 
     assert config.num_workers > 0, f"number of worker must be >= 1, you are {config.num_workers}"
@@ -137,4 +137,4 @@ def prepare_dirs(config):
 
 
 if __name__ == '__main__':
-    ge_config()
+    get_config()

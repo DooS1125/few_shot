@@ -12,7 +12,7 @@ def print_status(string):
 def train(config=None, trainer=None):
     if config is None or trainer is None:
         print(config, trainer)
-        config = ge_config()
+        config = get_config()
         trainer = Trainer(config)
 
     # Make directory for save logs and model
@@ -37,7 +37,7 @@ def train(config=None, trainer=None):
 # only test
 def test(config=None, trainer=None):
     if config is None or trainer is None:
-        config = ge_config()
+        config = get_config()
         trainer = Trainer(config)
 
     # test model
@@ -49,7 +49,7 @@ def test(config=None, trainer=None):
 def run():
 
     # Make options
-    config = ge_config()
+    config = get_config()
 
     # Make Trainer
     trainer = Trainer(config)
