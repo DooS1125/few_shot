@@ -137,4 +137,4 @@ def prepare_dirs(config):
 
 
 if __name__ == '__main__':
-    get_config()
+    ge_config()
