@@ -1,23 +1,11 @@
-## 🐁 NeW CRFs: Neural Window Fully-connected CRFs for Monocular Depth Estimation
+## 🐁 Few_shot Classification Practice
 
-This is the official PyTorch implementation code for NeWCRFs. For technical details, please refer to:
-
-**NeW CRFs: Neural Window Fully-connected CRFs for Monocular Depth Estimation** <br />
-Weihao Yuan, Xiaodong Gu, Zuozhuo Dai, Siyu Zhu, Ping Tan <br />
-**CVPR 2022** <br />
-**[[Project Page](https://weihaosky.github.io/newcrfs/)]** | 
-**[[Paper](https://arxiv.org/abs/2203.01502)]** <br />
-
-
-
+This is the official PyTorch implementation code for Few_shot
 
 ## 🐅Contents
 1. [Installation](#installation)
 2. [Datasets](#datasets)
-3. [Training](#training)
-4. [Evaluation](#evaluation)
-5. [Models](#models)
-6. [Demo](#demo)
+3. [Models](#models)
 
 ## 🐇 Installation
 ```
@@ -28,62 +16,12 @@ conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvi
 
 
 ## 🐉 Datasets
-You can prepare the datasets KITTI and NYUv2 according to [here](https://github.com/cleinc/bts), and then modify the data path in the config files to your dataset locations.
-
-Or you can download the NYUv2 data from [here](https://virutalbuy-public.oss-cn-hangzhou.aliyuncs.com/share/newcrfs/datasets/nyu/sync.zip) and download the KITTI data from [here](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_prediction).
+[ESC-50 dataset](https://github.com/karoldvl/ESC-50/archive/master.zip)
 
 
-## 🐍 Training
-First download the pretrained encoder backbone from [here](https://github.com/microsoft/Swin-Transformer), and then modify the pretrain path in the config files.
-
-Training the NYUv2 model:
-```
-python newcrfs/train.py configs/arguments_train_nyu.txt
-```
-
-Training the KITTI model:
-```
-python newcrfs/train.py configs/arguments_train_kittieigen.txt
-```
-
-
-## 🐎 Evaluation
-Evaluate the NYUv2 model:
-```
-python newcrfs/eval.py configs/arguments_eval_nyu.txt
-```
-
-Evaluate the KITTI model:
-```
-python newcrfs/eval.py configs/arguments_eval_kittieigen.txt
-```
 
 ## 🐐 Models
-| Model | Abs.Rel. | Sqr.Rel | RMSE | RMSElog | a1 | a2 | a3| SILog| 
-| :--- | :---: | :---: | :---: |  :---: |  :---: |  :---: |  :---: |  :---: |
-|[NYUv2](https://virutalbuy-public.oss-cn-hangzhou.aliyuncs.com/share/newcrfs/models/model_nyu.ckpt) | 0.0952 | 0.0443 | 0.3310 | 0.1185 | 0.923 | 0.992 | 0.998 | 9.1023 |
-|[KITTI_Eigen](https://virutalbuy-public.oss-cn-hangzhou.aliyuncs.com/share/newcrfs/models/model_kittieigen.ckpt) | 0.0520 | 0.1482 | 2.0716 | 0.0780 | 0.975 | 0.997 | 0.999 | 6.9859 |
-
-
-## 🐒 Demo
-Test images with the indoor model:
-```
-python newcrfs/test.py --data_path datasets/test_data --dataset nyu --filenames_file data_splits/test_list.txt --checkpoint_path model_nyu.ckpt --max_depth 10 --save_viz
-```
-
-Play with the live demo from a video or your webcam:
-```
-python newcrfs/demo.py --dataset nyu --checkpoint_path model_zoo/model_nyu.ckpt --max_depth 10 --video video.mp4
-```
-
-![Output1](files/output_nyu1_compressed.gif)
-
-[Demo video1](https://www.youtube.com/watch?v=RrWQIpXoP2Y)
-
-[Demo video2](https://www.youtube.com/watch?v=fD3sWH_54cg)
-
-[Demo video3](https://www.youtube.com/watch?v=IztmOYZNirM)
-
-## 🐐 Acknowledgements
-Thanks to Jin Han Lee for opening source of the excellent work [BTS](https://github.com/cleinc/bts).
-Thanks to Microsoft Research Asia for opening source of the excellent work [Swin Transformer](https://github.com/microsoft/Swin-Transformer).
+| Model | Accuracy | F1-Score | Precision | Specificity | 
+| :--- | :---: | :---: | :---: |  :---: |
+|ProtoNet | None | None | None | None |
+|SiameseNet | None | None | None | None |
