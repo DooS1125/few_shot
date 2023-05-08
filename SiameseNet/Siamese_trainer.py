@@ -58,7 +58,7 @@ class Trainer(object):
         writer = SummaryWriter(os.path.join(self.config.logs_dir, 'logs'), filename_suffix=self.config.num_model)
         im1, im2, _ = next(iter(valid_loader))
         writer.add_graph(model,
-                         [torch.rand((1, 1, 105, 105)).to(self.device), torch.rand(1, 1, 105, 105).to(self.device)])
+                         [torch.rand((1, 1, 40, 1186)).to(self.device), torch.rand(1, 1, 40, 1186).to(self.device)])
 
         counter = 0
         num_train = len(train_loader)

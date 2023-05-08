@@ -4,3 +4,4 @@ delete/
 *.wav
 save/
 *.npz
+result/
