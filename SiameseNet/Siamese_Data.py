@@ -28,23 +28,26 @@ class ESC_data(data.Dataset):
         
         lb=-1
         
-        self.category=[]
+        category=[]
+        pair=[]
         
         for index, row in new_df.iterrows():
             # category list로 category를 append 하고 새로운 category 나올 시 lb값을 1 증가시키는 구조 / 이렇게 해서 각 데이터 셋(train, val, test)의 label 값을 0~해당 클래스 수로 초기화
             # self.category에는 해당 클래스의 실제 category 있음
             path = osp.join(ROOT_PATH, row.filename)
-            if row.category not in self.category:
-                self.category.append(row.category) 
+            if row.category not in category:
+                category.append(row.category) 
                 lb +=1
             data.append(path)
             label.append(lb)
+            pair.append([path, lb])
 
         self.data = data
         self.label = label
         self.sample_rate=sample_rate
         self.feature=feature
-        self.pair = [self.data, self.label]
+        self.pair = pair
+        self.category = category
 
     def __len__(self):
         return len(self.data)
@@ -53,7 +56,7 @@ class ESC_data(data.Dataset):
         
         if i % 2 == 1:
             pair_label = 1.0
-            idx = random.randint(0, len(self.label) - 1)
+            idx = random.randint(0, len(self.category) - 1)
             data_list = [x for x in self.pair if x[1] == idx]
             data1 = random.choice(data_list)
             data2 = random.choice(data_list)
@@ -108,17 +111,19 @@ class ESC_testdata(data.Dataset):
         
         lb=-1
         
-        self.category=[]
+        category=[]
+        pair = []
         
         for index, row in new_df.iterrows():
             # category list로 category를 append 하고 새로운 category 나올 시 lb값을 1 증가시키는 구조 / 이렇게 해서 각 데이터 셋(train, val, test)의 label 값을 0~해당 클래스 수로 초기화
             # self.category에는 해당 클래스의 실제 category 있음
             path = osp.join(ROOT_PATH, row.filename)
-            if row.category not in self.category:
-                self.category.append(row.category) 
+            if row.category not in category:
+                category.append(row.category) 
                 lb +=1
             data.append(path)
             label.append(lb)
+            pair.append([path, lb])
 
         self.way = way
         self.trials = trials
@@ -129,16 +134,17 @@ class ESC_testdata(data.Dataset):
         self.label = label
         self.sample_rate=sample_rate
         self.feature=feature
-        self.pair = [self.data, self.label]
+        self.pair = pair
+        self.category = category
 
     def __len__(self):
         return self.trials * self.way
 
     def __getitem__(self, i):
         rand = Random(self.seed + i)
-        if i % 2 == 1:
+        if i % self.way == 0:
             pair_label = 1.0
-            idx = random.randint(0, len(self.label) - 1)
+            idx = random.randint(0, len(self.category) - 1)
             data_list = [x for x in self.pair if x[1] == idx]
             self.data1 = random.choice(data_list)
             data2 = random.choice(data_list)
