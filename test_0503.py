@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     seed_everything(2023)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    testset = ESC_data('val')
+    testset = ESC_data('test')
     test_sampler = CategoriesSampler(testset.label, 30,
                                 args.test_way, args.shot + args.query)
     test_loader = DataLoader(dataset=testset, batch_sampler=test_sampler,
