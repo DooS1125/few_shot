@@ -5,3 +5,4 @@ delete/
 save/
 *.npz
 result/
+wandb/
