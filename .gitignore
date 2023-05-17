@@ -6,3 +6,5 @@ save/
 *.npz
 result/
 wandb/
+*.yaml
+*.pth

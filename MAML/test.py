@@ -7,13 +7,16 @@ from Model import *
 
 Nway=5
 
-def meta_test(task_collection, pretrained=None):
+def meta_test(task_collection, Net="CNN", pretrained=None):
 
     acc_list = []
     for i in range(len(task_collection)):
-        cnn = CNN(Nway).to(device)
+        if Net=="CNN":
+            cnn = CNN(Nway).to(device)
+        else:
+            cnn = MAML_Layer(Nway).to(device)
         if pretrained == 'meta':
-            cnn.load_state_dict(torch.load('./models/cifar_maml.pth'))
+            cnn.load_state_dict(torch.load('./maml.pth'))
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(cnn.parameters(), lr=1e-2)
         num_epochs = 101

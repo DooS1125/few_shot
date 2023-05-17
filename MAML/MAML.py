@@ -70,7 +70,7 @@ class MAML:
             if val_acc >= acc:
                 acc = val_acc
                 print('Saved the model - Validation accuracy: %.2f %%' % (val_acc))   
-                torch.save(self.model.state_dict(), './models/cifar_maml.pth') 
+                torch.save(self.model.state_dict(), './maml.pth') 
           
         return loss_list
 
