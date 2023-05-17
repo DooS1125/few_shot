@@ -8,8 +8,9 @@ from utils import *
 import librosa
 from random import Random
 
-csv_path = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/esc50.csv'
-ROOT_PATH = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/alldata'
+
+csv_path = '../ESC_data/esc50.csv'
+ROOT_PATH = '../ESC_data/alldata'
 train_classes, val_classes, test_classes = train_test_split_class()
 n_mels=40
 

@@ -1,4 +1,4 @@
-from fire import Fire
+# from fire import Fire
 from arguments import *
 from Siamese_trainer import Trainer
 
