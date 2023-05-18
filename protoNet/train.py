@@ -33,7 +33,7 @@ def validation(model, data_loader, device, config):
 
 def train(model, train_loader, val_loader, optimizer, lr_scheduler, device, config):
 
-    early_stopping = EarlyStopping(patience=5, path='./weights/best.pt', verbose=True)
+    early_stopping = EarlyStopping(patience=10, path='./weights/best.pt', verbose=True)
     train_acc, train_loss, val_acc, val_loss = [], [], [], []
 
     for epoch in range(1, config.max_epoch + 1):

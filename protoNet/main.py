@@ -17,7 +17,7 @@ import wandb
 hyperparameter_defaults = dict(max_epoch = 100, query = 5, test_batch = 100,
                                shot = 5, way = 5, features = 'mel', win_length = 360, n_mels = 20, n_mfcc = 14, sr = 4000)
 
-wandb.init(config=hyperparameter_defaults, project="23_1_seminar")
+wandb.init(config=hyperparameter_defaults, project="few_shot")
 config = wandb.config
 
 if config.features == 'mel':
