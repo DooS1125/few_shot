@@ -74,9 +74,9 @@ if __name__ == '__main__':
     test_loss, test_acc = inference(model, loader, device, config)
 
 
-wandb.run.summary['train_loss'] = train_loss[config.max_epoch-1]
-wandb.run.summary['train_acc'] = train_acc[config.max_epoch-1]
-wandb.run.summary['val_loss'] = val_loss[config.max_epoch-1]
-wandb.run.summary['val_acc'] = val_acc[config.max_epoch-1]
+wandb.run.summary['train_loss'] = train_loss[-1]
+wandb.run.summary['train_acc'] = train_acc[-1]
+wandb.run.summary['val_loss'] = val_loss[-1]
+wandb.run.summary['val_acc'] = val_acc[-1]
 wandb.run.summary['test_loss'] = test_loss
 wandb.run.summary['test_acc'] = test_acc
