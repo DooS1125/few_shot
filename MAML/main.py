@@ -3,6 +3,7 @@ import numpy as np
 from Data import *
 from MAML import *
 from Model import *
+from test import meta_test
 from test import *
 from utils import *
 
