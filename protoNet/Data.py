@@ -6,14 +6,13 @@ import os.path as osp
 import pandas as pd
 from utils import *
 
-csv_path = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/esc50.csv'
-ROOT_PATH = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/alldata'
+csv_path = '../ESC_data/esc50.csv'
+ROOT_PATH = '../ESC_data/alldata'
 train_classes, val_classes, test_classes = train_test_split_class()
-n_mels=40
 
 class ESC_data(data.Dataset):
 
-    def __init__(self, set_name, feature='mel', sample_rate=22050 ):
+    def __init__(self, set_name, win_length, n_mels, n_mfcc, feature='mel', sample_rate=22050 ):
         """
         class_to_idx = data_csv[['target', 'category']].drop_duplicates().sort_values(by='target').set_index('category').to_dict()['target']
         category_df = data_csv[['category','target']].sort_values(by='target').drop_duplicates(subset='target').reset_index(drop=True)
@@ -55,6 +54,9 @@ class ESC_data(data.Dataset):
         self.data = data
         self.label = label
         self.sample_rate=sample_rate
+        self.win_length = win_length
+        self.n_mels = n_mels
+        self.n_mfcc = n_mfcc
         self.feature=feature
 
     def __len__(self):
@@ -65,8 +67,8 @@ class ESC_data(data.Dataset):
         samples, _ = librosa.load(path=path, sr=self.sample_rate)
         samples = norm_max(samples)
         if self.feature=='mel':
-            audio = log_mel(x=samples, n_mel=n_mels, sr=self.sample_rate, n_fft=372, hop_length=93)
+            audio = log_mel(x=samples, n_mel=self.n_mels, sr=self.sample_rate, n_fft=self.win_length, hop_length=int(self.win_length/2))
         elif self.feature == 'mfcc':
-            audio = MFCC(x=samples, n_fft=372, win_length=372, hop_length=93, sr=self.sample_rate, n_mfcc=14)
+            audio = MFCC(x=samples, n_fft=self.win_length, win_length=self.win_length, hop_length=int(self.win_length/2), sr=self.sample_rate, n_mfcc=self.n_mfcc)
         audio = torch.Tensor(audio).unsqueeze(0)
         return audio, label

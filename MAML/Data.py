@@ -14,7 +14,7 @@ n_mels=20
 
 class ESC_data(Dataset):
 
-    def __init__(self, support_set, query_set, labels, feature='mel', sample_rate=22050 ):
+    def __init__(self, support_set, query_set, labels, feature='mel', sample_rate=8000 ):
         
         self.support_set = torch.FloatTensor(support_set)
         self.query_set = torch.FloatTensor(query_set)
