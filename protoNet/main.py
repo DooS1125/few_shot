@@ -15,7 +15,7 @@ from train import *
 import wandb
 
 hyperparameter_defaults = dict(max_epoch = 100, query = 5, test_batch = 100,
-                               shot = 5, way = 5, features = 'mel', win_length = 360, n_mels = 20, n_mfcc = 14, sr = 4000)
+                               shot = 5, way = 5, features = 'mel', win_length = 360, n_mels = 20, n_mfcc = 20, sr = 4000)
 
 wandb.init(config=hyperparameter_defaults, project="few_shot")
 config = wandb.config
@@ -37,6 +37,12 @@ if __name__ == '__main__':
         valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         val_sampler = CategoriesSampler(valset.label, 50, config.way, config.shot + config.query)
         val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, num_workers=0, pin_memory=True)
+        
+        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
+        loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
+
+        
     else:
         trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         train_sampler = CategoriesSampler(trainset.label, 100, config.way, config.shot + config.query)
@@ -45,7 +51,10 @@ if __name__ == '__main__':
         valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         val_sampler = CategoriesSampler(valset.label, 50, config.way, config.shot + config.query)
         val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, num_workers=0, pin_memory=True)
-
+        
+        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
+        loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
 
     model = Convnet().to(device)
     
@@ -55,20 +64,6 @@ if __name__ == '__main__':
     
     train_acc, train_loss, val_acc, val_loss = train(model, train_loader, val_loader, optimizer, lr_scheduler, device, config)
 
-
-if __name__ == '__main__':
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-    if config.features == 'mel':
-        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
-        sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
-        loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
-    else:
-        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
-        sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
-        loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
-
-    model = Convnet().to(device)
     model.load_state_dict(torch.load('./weights/best.pt'))
     
     test_loss, test_acc = inference(model, loader, device, config)
