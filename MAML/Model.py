@@ -33,25 +33,4 @@ class CNN(nn.Module):
         x = torch.mean(x, [2,3])
         x = F.relu(F.linear(x, weights[10], weights[11]))
         x = F.linear(x, weights[12], weights[13])
-        return x       
-    
-
-class MAML_Layer(nn.Module):
-    def __init__(self, Nway):
-        super(MAML_Layer, self).__init__()
-        self.fc = nn.Sequential((nn.Linear(8620,10)),
-                                nn.ReLU(),
-                                nn.Linear(10,10),
-                                nn.ReLU(),
-                                nn.Linear(10,Nway))
-        
-    def forward(self, x):
-        return self.fc(x)
-    
-    def parameterised(self, x, weights):
-        x = F.linear(x, weights[0], weights[1])
-        x = F.relu(x)
-        x = F.linear(x, weights[2], weights[3])
-        x = F.relu(x)
-        x = F.linear(x, weights[4], weights[5])
-        return x
+        return x 

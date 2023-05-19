@@ -5,21 +5,15 @@ from Data import *
 from MAML import *
 from Model import *
 
-Nway=5
-
-def meta_test(task_collection, Net="CNN", pretrained=None):
-
-    acc_list = []
+def meta_test(task_collection, device, config):
+    test_loss, test_acc = [], []
+    start_time = time.time()
     for i in range(len(task_collection)):
-        if Net=="CNN":
-            cnn = CNN(Nway).to(device)
-        else:
-            cnn = MAML_Layer(Nway).to(device)
-        if pretrained == 'meta':
-            cnn.load_state_dict(torch.load('./maml.pth'))
+        cnn = CNN(config.way).to(device)
+        cnn.load_state_dict(torch.load('./weights/best.pt'))
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(cnn.parameters(), lr=1e-2)
-        num_epochs = 101
+        num_epochs = 100
         testloader = task_collection[i]
         data1, data2, label = iter(testloader).next()
         cnn.train() 
@@ -39,7 +33,15 @@ def meta_test(task_collection, Net="CNN", pretrained=None):
             total += label.size(0)
             correct += (predicted == label.to(device)).sum().item()
         
-        acc_list.append(100 * correct / total)
+        test_acc.append(100 * correct / total)
+        test_loss.append(loss.item())
         
-    acc_info = np.array(acc_list)
-    print('Avg. Test accuracy: %.2f %% ± %.2f' % (np.mean(acc_info), 1.96*np.std(acc_info)/np.sqrt(len(acc_info))))   
+    test_acc = np.array(test_acc).mean()
+    test_loss = np.array(test_loss).mean()
+    
+    finish_time = time.time()
+    epoch_time = finish_time - start_time
+    
+    print(f'Test Loss : [{test_loss:.4f}] Test ACC : [{test_acc:.4f}] Epoch_time : [{epoch_time:.0f}s]')
+
+    return test_loss, test_acc

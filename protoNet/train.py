@@ -1,4 +1,3 @@
-import argparse
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -7,6 +6,7 @@ from Data import *
 from Sampler import *
 from Proto import *
 from utils import *
+import wandb
 
 def validation(model, data_loader, device, config):
     model.eval()
@@ -75,8 +75,9 @@ def train(model, train_loader, val_loader, optimizer, lr_scheduler, device, conf
         epoch_time = finish_time - start_time
 
         print(f'Epoch [{epoch}], Train Loss : [{train_loss_epoch:.4f}] Train ACC : [{train_acc_epoch:.4f}] Val Loss : [{val_loss_epoch:.4f}] Val ACC : [{val_acc_epoch:.4f}] Epoch_time : [{epoch_time:.0f}s]')
-
-        val_loss.append(val_loss_epoch)
+        
+        wandb.log({"train_loss": train_loss_epoch, "train_acc": train_acc_epoch, "val_loss": val_loss_epoch, "val_acc": val_acc_epoch}, step=epoch)
+        
         val_acc.append(val_acc_epoch)
 
         if lr_scheduler is not None:

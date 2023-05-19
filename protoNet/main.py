@@ -30,29 +30,39 @@ if __name__ == '__main__':
     
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     if config.features == 'mel':
-        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, 
+                            n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         train_sampler = CategoriesSampler(trainset.label, 100, config.way, config.shot + config.query)
-        train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler, num_workers=0, pin_memory=True)
+        train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler, 
+                                  num_workers=0, pin_memory=True)
 
-        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, 
+                          n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         val_sampler = CategoriesSampler(valset.label, 50, config.way, config.shot + config.query)
-        val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, num_workers=0, pin_memory=True)
+        val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, 
+                                num_workers=0, pin_memory=True)
         
-        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, 
+                           n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
         loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
 
         
     else:
-        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, 
+                            n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         train_sampler = CategoriesSampler(trainset.label, 100, config.way, config.shot + config.query)
-        train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler, num_workers=0, pin_memory=True)
+        train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler, 
+                                  num_workers=0, pin_memory=True)
 
-        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, 
+                          n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         val_sampler = CategoriesSampler(valset.label, 50, config.way, config.shot + config.query)
-        val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, num_workers=0, pin_memory=True)
+        val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, 
+                                num_workers=0, pin_memory=True)
         
-        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, 
+                           n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
         sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
         loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
 
@@ -64,14 +74,14 @@ if __name__ == '__main__':
     
     train_acc, train_loss, val_acc, val_loss = train(model, train_loader, val_loader, optimizer, lr_scheduler, device, config)
 
+
     model.load_state_dict(torch.load('./weights/best.pt'))
-    
     test_loss, test_acc = inference(model, loader, device, config)
 
 
-wandb.run.summary['train_loss'] = train_loss[-1]
-wandb.run.summary['train_acc'] = train_acc[-1]
-wandb.run.summary['val_loss'] = val_loss[-1]
-wandb.run.summary['val_acc'] = val_acc[-1]
+wandb.run.summary['train_loss'] = min(train_loss)
+wandb.run.summary['train_acc'] = max(train_acc)
+wandb.run.summary['val_loss'] = min(val_loss)
+wandb.run.summary['val_acc'] = max(val_acc)
 wandb.run.summary['test_loss'] = test_loss
 wandb.run.summary['test_acc'] = test_acc

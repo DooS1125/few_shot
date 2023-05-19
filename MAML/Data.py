@@ -6,15 +6,13 @@ from utils import *
 import pandas as pd
 import os.path as osp
 
-#csv_path = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/esc50.csv'
 csv_path = '../ESC_data/esc50.csv'
-ROOT_PATH = 'C:/Users/ParkDooseo/Desktop/few_shot/ESC_data/alldata'
+ROOT_PATH = '../ESC_data/alldata'
 train_classes, val_classes, test_classes = train_test_split_class()
-n_mels=20
 
 class ESC_data(Dataset):
 
-    def __init__(self, support_set, query_set, labels, feature='mel', sample_rate=8000 ):
+    def __init__(self, support_set, query_set, labels):
         
         self.support_set = torch.FloatTensor(support_set)
         self.query_set = torch.FloatTensor(query_set)
@@ -31,10 +29,10 @@ class ESC_data(Dataset):
 
 class ESC_DataSet:
     
-    def __init__(self, Nway, Kshot, set_name, feature='mel', sample_rate=8000 ):
+    def __init__(self, config, set_name):
         
-        self.Nway = Nway
-        self.Kshot = Kshot
+        self.Nway = config.way
+        self.Kshot = config.shot
         
         data_csv = pd.read_csv(csv_path)
         class_csv = data_csv[['filename','target','category']]
@@ -68,8 +66,11 @@ class ESC_DataSet:
 
         self.data = data
         self.label = label
-        self.sample_rate=sample_rate
-        self.feature=feature
+        self.sample_rate = config.sr
+        self.win_length = config.win_length
+        self.n_mels = config.n_mels
+        self.n_mfcc = config.n_mfcc
+        self.feature = config.features
 
     def task_generator(self):
         
@@ -87,9 +88,11 @@ class ESC_DataSet:
                     samples, _ = librosa.load(path=audio_path, sr=self.sample_rate)
                     samples = norm_max(samples)
                     if self.feature=='mel':
-                        audio = log_mel(x=samples, n_mel=n_mels, sr=self.sample_rate, n_fft=372, hop_length=93)
+                        audio = log_mel(x=samples, n_mel=self.n_mels, sr=self.sample_rate, 
+                                        n_fft=self.win_length, hop_length=int(self.win_length/2))
                     elif self.feature == 'mfcc':
-                        audio = MFCC(x=samples, n_fft=372, win_length=372, hop_length=93, sr=self.sample_rate, n_mfcc=14)
+                        audio = MFCC(x=samples, n_fft=self.win_length, win_length=self.win_length, 
+                                     hop_length=int(self.win_length/2), sr=self.sample_rate, n_mfcc=self.n_mfcc)
                     audio = torch.Tensor(audio).unsqueeze(0)
                     support_set.append(audio)
                     targets.append(i)
@@ -97,9 +100,11 @@ class ESC_DataSet:
                     samples, _ = librosa.load(path=audio_path, sr=self.sample_rate)
                     samples = norm_max(samples)
                     if self.feature=='mel':
-                        audio = log_mel(x=samples, n_mel=n_mels, sr=self.sample_rate, n_fft=372, hop_length=93)
+                        audio = log_mel(x=samples, n_mel=self.n_mels, sr=self.sample_rate, 
+                                        n_fft=self.win_length, hop_length=int(self.win_length/2))
                     elif self.feature == 'mfcc':
-                        audio = MFCC(x=samples, n_fft=372, win_length=372, hop_length=93, sr=self.sample_rate, n_mfcc=14)
+                        audio = MFCC(x=samples, n_fft=self.win_length, win_length=self.win_length, 
+                                     hop_length=int(self.win_length/2), sr=self.sample_rate, n_mfcc=self.n_mfcc)
                     audio = torch.Tensor(audio).unsqueeze(0)
                     query_set.append(audio)  
 
