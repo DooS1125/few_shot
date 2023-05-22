@@ -67,8 +67,8 @@ class ESC_data(data.Dataset):
         samples, _ = librosa.load(path=path, sr=self.sample_rate)
         samples = norm_max(samples)
         if self.feature=='mel':
-            audio = log_mel(x=samples, n_mel=self.n_mels, sr=self.sample_rate, n_fft=self.win_length, hop_length=int(self.win_length/2))
+            audio = log_mel(x=samples, n_mel=self.n_mels, sr=self.sample_rate, n_fft=self.win_length, hop_length=int(self.win_length/4))
         elif self.feature == 'mfcc':
-            audio = MFCC(x=samples, n_fft=self.win_length, win_length=self.win_length, hop_length=int(self.win_length/2), sr=self.sample_rate, n_mfcc=self.n_mfcc)
+            audio = MFCC(x=samples, n_fft=self.win_length, win_length=self.win_length, hop_length=int(self.win_length/4), sr=self.sample_rate, n_mfcc=self.n_mfcc)
         audio = torch.Tensor(audio).unsqueeze(0)
         return audio, label

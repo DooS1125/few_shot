@@ -33,7 +33,7 @@ def validation(model, data_loader, device, config):
 
 def train(model, train_loader, val_loader, optimizer, lr_scheduler, device, config):
 
-    early_stopping = EarlyStopping(patience=10, path='./weights/best.pt', verbose=True)
+    early_stopping = EarlyStopping(patience=20, path='./weights/best.pt', verbose=True)
     train_acc, train_loss, val_acc, val_loss = [], [], [], []
 
     for epoch in range(1, config.max_epoch + 1):
@@ -78,12 +78,13 @@ def train(model, train_loader, val_loader, optimizer, lr_scheduler, device, conf
         
         wandb.log({"train_loss": train_loss_epoch, "train_acc": train_acc_epoch, "val_loss": val_loss_epoch, "val_acc": val_acc_epoch}, step=epoch)
         
+        val_loss.append(val_loss_epoch)
         val_acc.append(val_acc_epoch)
 
         if lr_scheduler is not None:
             lr_scheduler.step(val_loss_epoch)
 
-        early_stopping(val_loss_epoch, model)
+        early_stopping(val_loss_epoch, model, mode=True)
         if early_stopping.early_stop:
             print("Early stopping")
             break

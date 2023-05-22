@@ -15,54 +15,50 @@ from train import *
 import wandb
 
 hyperparameter_defaults = dict(max_epoch = 100, query = 5, test_batch = 100,
-                               shot = 5, way = 5, features = 'mel', win_length = 360, n_mels = 20, n_mfcc = 20, sr = 4000)
+                               shot = 5, way = 5, features = 'mel', win_length = 360, n_features = 20, sr = 4000)
 
 wandb.init(config=hyperparameter_defaults, project="few_shot")
 config = wandb.config
 
-if config.features == 'mel':
-    run_name = str(config.shot) + 'shot_' + str(config.way) + 'way_' + str(config.features) + '_' + str(config.win_length) + '_'  + str(config.n_mels) + '_' + str(config.sr)
-else:
-    run_name = str(config.shot) + 'shot_' + str(config.way) + 'way_' + str(config.features) + '_' + str(config.win_length) + '_'  + str(config.n_mfcc) + '_' + str(config.sr)
+run_name = 'proto_' + str(config.shot) + 'shot_' + str(config.way) + 'way_' + str(config.features) + '_' + str(config.win_length) + '_'  + str(config.n_features) + '_' + str(config.sr)
 wandb.run.name=run_name
 
 if __name__ == '__main__':
-    
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     if config.features == 'mel':
-        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, 
-                            n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_features, 
+                            n_mfcc = config.n_features, feature = config.features, sample_rate = config.sr)
         train_sampler = CategoriesSampler(trainset.label, 100, config.way, config.shot + config.query)
         train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler, 
-                                  num_workers=0, pin_memory=True)
+                                num_workers=0, pin_memory=True)
 
-        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, 
-                          n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_features, 
+                        n_mfcc = config.n_features, feature = config.features, sample_rate = config.sr)
         val_sampler = CategoriesSampler(valset.label, 50, config.way, config.shot + config.query)
         val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, 
                                 num_workers=0, pin_memory=True)
         
-        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, 
-                           n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_features, 
+                        n_mfcc = config.n_features, feature = config.features, sample_rate = config.sr)
         sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
         loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
 
         
     else:
-        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_mels, 
-                            n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        trainset = ESC_data('train', win_length = config.win_length, n_mels = config.n_features, 
+                            n_mfcc = config.n_features, feature = config.features, sample_rate = config.sr)
         train_sampler = CategoriesSampler(trainset.label, 100, config.way, config.shot + config.query)
         train_loader = DataLoader(dataset=trainset, batch_sampler=train_sampler, 
-                                  num_workers=0, pin_memory=True)
+                                num_workers=0, pin_memory=True)
 
-        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_mels, 
-                          n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        valset = ESC_data('val', win_length = config.win_length, n_mels = config.n_features, 
+                        n_mfcc = config.n_features, feature = config.features, sample_rate = config.sr)
         val_sampler = CategoriesSampler(valset.label, 50, config.way, config.shot + config.query)
         val_loader = DataLoader(dataset=valset, batch_sampler=val_sampler, 
                                 num_workers=0, pin_memory=True)
         
-        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_mels, 
-                           n_mfcc = config.n_mfcc, feature = config.features, sample_rate = config.sr)
+        dataset = ESC_data('test', win_length = config.win_length, n_mels = config.n_features, 
+                        n_mfcc = config.n_features, feature = config.features, sample_rate = config.sr)
         sampler = CategoriesSampler(dataset.label, config.test_batch, config.way, config.shot + config.query)
         loader = DataLoader(dataset, batch_sampler=sampler, num_workers=0, pin_memory=True)
 
@@ -70,7 +66,7 @@ if __name__ == '__main__':
     
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3, 
-                                                              threshold_mode='abs', min_lr=1e-5, verbose=True)
+                                                            threshold_mode='abs', min_lr=1e-5, verbose=True)
     
     train_acc, train_loss, val_acc, val_loss = train(model, train_loader, val_loader, optimizer, lr_scheduler, device, config)
 
